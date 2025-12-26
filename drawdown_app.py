@@ -65,34 +65,37 @@ if ticker1:
         # Get stock names
         stock_name1 = info1.get('longName', ticker1) if info1 else ticker1
         
-        # Calculate drawdown for stock 1
-        prices1 = df1['Close']
-        drawdown1, cumulative_max1 = calculate_drawdown(prices1)
-        
-        # Find max drawdown for stock 1
-        max_drawdown1 = drawdown1.min()
-        max_drawdown_date1 = drawdown1.idxmin()
-        
-    # Process stock 2 if provided
-    if df2 is not None and not df2.empty:
-        stock_name2 = info2.get('longName', ticker2) if info2 else ticker2
-    
-        # Align time periods - use only overlapping dates
-        common_dates = df1.index.intersection(df2.index)
-        df1 = df1.loc[common_dates]
-        df2 = df2.loc[common_dates]
-    
-        # Recalculate for stock 1 with aligned dates
-        prices1 = df1['Close']
-        drawdown1, cumulative_max1 = calculate_drawdown(prices1)
-        max_drawdown1 = drawdown1.min()
-        max_drawdown_date1 = drawdown1.idxmin()
-    
-        # Calculate for stock 2
-        prices2 = df2['Close']
-        drawdown2, cumulative_max2 = calculate_drawdown(prices2)
-        max_drawdown2 = drawdown2.min()
-        max_drawdown_date2 = drawdown2.idxmin()
+        # Process stock 2 if provided
+        if df2 is not None and not df2.empty:
+            stock_name2 = info2.get('longName', ticker2) if info2 else ticker2
+            
+            # Align time periods - use only overlapping dates
+            common_dates = df1.index.intersection(df2.index)
+            df1 = df1.loc[common_dates]
+            df2 = df2.loc[common_dates]
+            
+            # Calculate for stock 1 with aligned dates
+            prices1 = df1['Close']
+            drawdown1, cumulative_max1 = calculate_drawdown(prices1)
+            max_drawdown1 = drawdown1.min()
+            max_drawdown_date1 = drawdown1.idxmin()
+            
+            # Calculate for stock 2
+            prices2 = df2['Close']
+            drawdown2, cumulative_max2 = calculate_drawdown(prices2)
+            max_drawdown2 = drawdown2.min()
+            max_drawdown_date2 = drawdown2.idxmin()
+        else:
+            # Calculate drawdown for stock 1 only
+            prices1 = df1['Close']
+            drawdown1, cumulative_max1 = calculate_drawdown(prices1)
+            max_drawdown1 = drawdown1.min()
+            max_drawdown_date1 = drawdown1.idxmin()
+            
+            stock_name2 = None
+            prices2 = None
+            drawdown2 = None
+            cumulative_max2 = None
         
         # Display metrics
         if ticker2 and df2 is not None:
@@ -191,29 +194,29 @@ if ticker1:
         
         fig_dd.add_trace(go.Scatter(
             x=df1.index, y=drawdown1, fill='tozeroy', name=f'{ticker1} Drawdown',
-            line=dict(color='#C73E1D', width=2),
-            fillcolor='rgba(199, 62, 29, 0.3)'
+            line=dict(color='#2E86AB', width=2),
+            fillcolor='rgba(46, 134, 171, 0.3)'
         ))
         
         # Mark maximum drawdown for stock 1
         fig_dd.add_trace(go.Scatter(
             x=[max_drawdown_date1], y=[max_drawdown1],
             mode='markers', name=f'{ticker1} Max DD',
-            marker=dict(color='darkred', size=12, symbol='diamond'),
+            marker=dict(color='#1a5278', size=12, symbol='diamond'),
             hovertemplate=f'{ticker1} Max DD: {max_drawdown1:.2f}%<br>Date: {max_drawdown_date1.strftime("%Y-%m-%d")}<extra></extra>'
         ))
         
         if ticker2 and df2 is not None:
             fig_dd.add_trace(go.Scatter(
                 x=df2.index, y=drawdown2, name=f'{ticker2} Drawdown',
-                line=dict(color='#0077B6', width=2)
+                line=dict(color='#F77F00', width=2)
             ))
             
             # Mark maximum drawdown for stock 2
             fig_dd.add_trace(go.Scatter(
                 x=[max_drawdown_date2], y=[max_drawdown2],
                 mode='markers', name=f'{ticker2} Max DD',
-                marker=dict(color='#003f5c', size=12, symbol='diamond'),
+                marker=dict(color='#c46200', size=12, symbol='diamond'),
                 hovertemplate=f'{ticker2} Max DD: {max_drawdown2:.2f}%<br>Date: {max_drawdown_date2.strftime("%Y-%m-%d")}<extra></extra>'
             ))
         

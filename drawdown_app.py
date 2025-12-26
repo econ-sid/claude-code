@@ -74,17 +74,25 @@ if ticker1:
         max_drawdown_date1 = drawdown1.idxmin()
         
         # Process stock 2 if provided
-        if df2 is not None and not df2.empty:
-            stock_name2 = info2.get('longName', ticker2) if info2 else ticker2
-            prices2 = df2['Close']
-            drawdown2, cumulative_max2 = calculate_drawdown(prices2)
-            max_drawdown2 = drawdown2.min()
-            max_drawdown_date2 = drawdown2.idxmin()
-        else:
-            stock_name2 = None
-            prices2 = None
-            drawdown2 = None
-            cumulative_max2 = None
+if df2 is not None and not df2.empty:
+    stock_name2 = info2.get('longName', ticker2) if info2 else ticker2
+    
+    # Align time periods - use only overlapping dates
+    common_dates = df1.index.intersection(df2.index)
+    df1 = df1.loc[common_dates]
+    df2 = df2.loc[common_dates]
+    
+    # Recalculate for stock 1 with aligned dates
+    prices1 = df1['Close']
+    drawdown1, cumulative_max1 = calculate_drawdown(prices1)
+    max_drawdown1 = drawdown1.min()
+    max_drawdown_date1 = drawdown1.idxmin()
+    
+    # Calculate for stock 2
+    prices2 = df2['Close']
+    drawdown2, cumulative_max2 = calculate_drawdown(prices2)
+    max_drawdown2 = drawdown2.min()
+    max_drawdown_date2 = drawdown2.idxmin()
         
         # Display metrics
         if ticker2 and df2 is not None:
